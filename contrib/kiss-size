@@ -1,44 +1,31 @@
 #!/bin/sh -ef
-# Show the size on disk for a package
 
 get_size() {
-    # Naive function to convert bytes to human readable
-    # sizes (MB, KB, etc). This is probably wrong in places
-    # though we can fix this over time. It's a start.
-    case ${#1} in
-        [0-3]) hum=$(($1))KB ;;
-        [4-6]) hum=$(($1 / 1024))MB ;;
-        [7-9]) hum=$(($1 / 1024 / 1024))GB ;;
-        *)     hum=$(($1))  ;;
-    esac
-
+    _s=${1:-0}
+    if [ "$_s" -ge 1048576 ]; then
+        hum=$((_s / 1048576)).$(((_s % 1048576) * 10 / 1048576))GB
+    elif [ "$_s" -ge 1024 ]; then
+        hum=$((_s / 1024)).$(((_s % 1024) * 10 / 1024))MB
+    else
+        hum=${_s}KB
+    fi
     printf '%s\t%s\n' "$hum" "$2"
 }
 
-# Use the current directory as the package name if no package is given.
 [ "$1" ] || set -- "${PWD##*/}"
 
-# Ignore shellcheck as we want the warning's behavior.
-# shellcheck disable=2015
 kiss list "${1:-null}" >/dev/null || {
     printf 'usage: kiss-size [pkg]\n'
     exit 1
 }
 
-# Filter directories from manifest and leave only files.
-# Directories in the manifest end in a trailing '/'.
-# Send the file list to 'xargs' to run through 'du',
-# this prevents du from exiting due to too many arguments
 sed -e "s|^|$KISS_ROOT|" -e 's|.*/$||' \
     "$KISS_ROOT/var/db/kiss/installed/$1/manifest" \
     | xargs du -sk -- 2>/dev/null |
-
-# Iterate over each line and convert the byte output to human
-# readable (MB, KB, GB, etc).
 while read -r size file || {
-    get_size "$tot" total >&2
+    get_size "${tot:-0}" total >&2
     break
 } do
     get_size "$size" "$file"
-    tot=$((tot + size))
+    tot=$((${tot:-0} + size))
 done
