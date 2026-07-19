@@ -21,7 +21,7 @@ l=$n$(
 
         # Exclude packages which are not really orphans.
         printf '%s\n' baseinit baselayout busybox bzip2 e2fsprogs gcc \
-                      git grub kiss make musl
+                      git kiss pdpmake musl
     } |
 
     # Remove duplicates.
