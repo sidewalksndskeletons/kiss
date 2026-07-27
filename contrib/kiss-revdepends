@@ -1,9 +1,11 @@
 #!/bin/sh -e
+
 # Display packages which depend on package
 
 [ "$1" ] || set -- "${PWD##*/}"
 
-cd "$KISS_ROOT/var/db/kiss/installed"
-
-grep -E "^$1( |$)"  -- */depends
-
+IFS=:
+for repo in $KISS_PATH; do
+    [ -d "$repo" ] || continue
+    (cd "$repo" && grep -E "^$1( |$)" -- */depends 2>/dev/null) || true
+done
