@@ -211,7 +211,7 @@ sh256() {
 _sh256() {
     # There's no standard utility to generate sha256 checksums.
     # This is a simple wrapper around sha256sum, sha256, shasum,
-    # openssl, digest, ... which will use whatever is available.
+    # sha256, digest, ... which will use whatever is available.
     #
     # All utilities must match 'sha256sum' output.
     #
@@ -223,7 +223,6 @@ _sh256() {
 
     # Set the arguments based on found sha256 utility.
     case ${cmd_sha##*/} in
-        openssl) set -- dgst -sha256 -r "$@" ;;
          sha256) set -- -r "$@" ;;
          shasum) set -- -a 256 "$@" ;;
          digest) set -- -a sha256 "$@" ;;
@@ -1974,7 +1973,6 @@ main() {
 
     # Figure out which sha256 utility is available.
     cmd_sha=${KISS_CHK:-"$(
-        command -v openssl   ||
         command -v sha256sum ||
         command -v sha256    ||
         command -v shasum    ||
