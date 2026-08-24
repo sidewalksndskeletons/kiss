@@ -1930,6 +1930,8 @@ create_tmp_dirs() {
 }
 
 main() {
+    # Force a sane umask; don't inherit a restrictive one (e.g. 027) from the caller.
+    umask 022
     # Globally disable globbing and enable exit-on-error.
     set -ef
 
